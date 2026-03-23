@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SinavForge" parent="Theme.AppCompat.NoActionBar">
+        <!-- Durum çubuğu rengi -->
+        <item name="android:statusBarColor">#0f1e3c</item>
+        <item name="android:navigationBarColor">#0f1e3c</item>
+        <item name="android:windowBackground">#0f1e3c</item>
+        <!-- Tam ekran -->
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

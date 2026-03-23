@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Test Bankası — Akıllı Sınav Hazırlayıcı</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+</head>
+<body>
+
+<!-- ══════════════ TOOLBAR ══════════════ -->
+<header class="toolbar">
+  <div class="toolbar-brand">
+    <span class="brand-icon">⬡</span>
+    <span class="brand-name">Test Bankası</span>
+  </div>
+  <div class="toolbar-actions">
+    <label class="btn btn-primary" id="upload-label">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      PDF Seç
+      <input type="file" id="pdf-upload" accept=".pdf" hidden/>
+    </label>
+    <button class="btn btn-secondary" id="btn-detect" disabled>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="btn-label">Tara</span>
+    </button>
+    <button class="btn btn-secondary" id="btn-detect-range" disabled title="Sayfa aralığı seçerek tara">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span class="btn-label">Aralık Tara</span>
+    </button>
+    <button class="btn btn-secondary" id="btn-smart-layout" disabled>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      <span class="btn-label">Akıllı Düzen</span>
+    </button>
+    <button class="btn btn-export" id="btn-export" disabled>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="btn-label">Önizle &amp; İndir</span>
+    </button>
+    <button class="btn btn-icon" id="btn-open-pdf" title="PDF'i görüntüle" disabled>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </button>
+    <button class="btn btn-icon" id="btn-settings" title="Ayarlar">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════ ANA EKRAN ══════════════ -->
+<main class="main-screen">
+
+  <!-- Boş durum -->
+  <div class="home-empty" id="home-empty">
+    <div class="home-empty-inner">
+      <div class="home-logo">⬡</div>
+      <h1>Test Bankası</h1>
+      <p>PDF soru bankasından istediğin soruları seç,<br/>sınav kağıdı oluştur.</p>
+      <label class="btn btn-primary btn-lg" for="pdf-upload">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        PDF Seç
+      </label>
+      <span class="home-hint">veya PDF dosyasını buraya sürükle</span>
+    </div>
+  </div>
+
+  <!-- Soru kartları grid -->
+  <div class="questions-grid hidden" id="questions-grid">
+    <div class="grid-header">
+      <!-- Üst satır: başlık + görünüm + arama -->
+      <div class="grid-header-row1">
+        <div class="grid-header-left">
+          <h2>Seçilen Sorular</h2>
+          <span class="question-count" id="question-count">0</span>
+          <div class="grid-header-view">
+            <button class="view-mode-btn active" data-mode="grid" title="Izgara">⊞</button>
+            <button class="view-mode-btn" data-mode="compact" title="Kompakt">☰</button>
+            <button class="view-mode-btn" data-mode="large" title="Büyük">⊟</button>
+          </div>
+        </div>
+        <div class="grid-search-inline">
+          <input type="search" id="q-search-input" placeholder="🔍 Soru ara…" autocomplete="off"/>
+        </div>
+      </div>
+      <!-- Alt satır: butonlar -->
+      <div class="grid-header-right grid-header-row2">
+        <button class="btn btn-ghost-dark btn-sm" id="btn-dual-form" disabled title="A ve B Formu PDF">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/></svg>
+          A/B PDF
+        </button>
+        <button class="btn btn-ghost-dark btn-sm" id="btn-shuffle" disabled title="A/B Form — Soru sırasını karıştır">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+          A/B Form
+        </button>
+        <button class="btn btn-ghost-dark btn-sm" id="btn-export-json" disabled title="JSON olarak kaydet (Ctrl+S)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          JSON Kaydet
+        </button>
+        <label class="btn btn-ghost-dark btn-sm" title="JSON yükle">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          JSON Yükle
+          <input type="file" id="import-json-input" accept=".json" hidden/>
+        </label>
+        <button class="btn btn-ghost-dark btn-sm" id="btn-undo" disabled title="Geri al (Ctrl+Z)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+        </button>
+        <button class="btn btn-ghost-dark btn-sm" id="btn-classify" disabled>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          YZ Sınıfla
+        </button>
+        <button class="btn btn-ghost-dark btn-sm" id="btn-clear" disabled>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Temizle
+        </button>
+        <button class="btn btn-ghost-dark btn-sm" id="btn-print" disabled>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Yazdır
+        </button>
+      </div>
+    </div>
+
+    <!-- Çoklu PDF havuzu bar -->
+    <div class="pdf-pool-bar hidden">
+      <span class="pool-label">PDF Havuzu:</span>
+      <div id="pdf-pool-list" class="pdf-pool-list"></div>
+      <label class="btn btn-ghost-dark btn-sm pool-add-btn" title="Yeni PDF ekle">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        PDF Ekle
+        <input type="file" id="pdf-pool-upload" accept=".pdf" hidden/>
+      </label>
+    </div>
+    <!-- İstatistik Paneli (Madde 8) -->
+    <div class="stats-panel hidden" id="stats-panel"></div>
+    <ul class="q-grid-list" id="questions-list"></ul>
+  </div>
+
+</main>
+
+<!-- ══════════════ PDF VIEWER MODAL ══════════════ -->
+<div class="pdf-modal hidden" id="pdf-modal">
+  <div class="pdf-modal-inner">
+
+     <!-- PDF modal toolbar - 2 satir -->
+     <div class="pdf-modal-toolbar">
+       <div class="pmt-row1">
+         <div class="pmt-left">
+           <span class="pmt-fname" id="file-name-label">—</span>
+         </div>
+         <div class="pmt-center">
+           <button class="ctrl-btn" id="btn-prev">&#8249;</button>
+           <button class="ctrl-btn page-jump-btn" id="btn-page-jump">
+             <span id="page-current">1</span><span class="page-sep"> / </span><span id="page-total">1</span>
+           </button>
+           <button class="ctrl-btn" id="btn-next">&#8250;</button>
+         </div>
+         <div class="pmt-right">
+           <button class="pdf-modal-close" id="btn-close-pdf-modal">✕ Kapat</button>
+         </div>
+       </div>
+       <div class="pmt-row2">
+         <div class="pmt-left">
+           <button class="ctrl-btn" id="btn-zoom-out">−</button>
+           <span class="zoom-label" id="zoom-label">100%</span>
+           <button class="ctrl-btn" id="btn-zoom-in">+</button>
+           <div class="divider-v"></div>
+           <button class="ctrl-btn mode-btn active" id="btn-mode-select" title="Seçim">
+             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-7 1-3 7z"/></svg>
+           </button>
+           <button class="ctrl-btn mode-btn" id="btn-mode-draw" title="Çiz (D)">
+             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+           </button>
+           <span id="mode-indicator" class="mode-tag">SEÇİM MODU</span>
+         </div>
+         <div class="pmt-right">
+           <button class="ctrl-btn spen-toggle" id="btn-spen-toggle" title="S-Pen modu">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+             S-Pen
+           </button>
+           <div class="divider-v"></div>
+           <button class="btn btn-secondary btn-sm" id="btn-detect-modal" disabled>
+             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+             Sayfayı Tara
+           </button>
+         </div>
+       </div>
+     </div>
+
+    <!-- PDF canvas -->
+    <div class="pdf-modal-body">
+      <!-- FIX #5: Sayfa thumbnail şeridi -->
+      <div class="page-strip" id="page-strip"></div>
+      <div class="canvas-wrapper" id="canvas-wrapper">
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="pdf-canvas"></canvas>
+          <canvas id="overlay-canvas"></canvas>
+        </div>
+      </div>
+      <!-- Float panel -->
+      <div class="region-controls hidden" id="region-controls">
+        <button class="region-btn confirm" id="btn-confirm-region" title="Ekle (✓)">✓</button>
+        <span class="region-label" id="region-label">?</span>
+        <button class="region-btn redraw" id="btn-redraw-region" title="Yeniden çiz (S-Pen butonu)">✏</button>
+        <button class="region-btn remove" id="btn-remove-region" title="Kaldır (✕)">✕</button>
+        <button class="region-btn edit" id="btn-edit-region" title="Koordinat düzenle">⊹</button>
+      </div>
+    </div>
+
+    <!-- PDF modal status -->
+    <div class="pdf-modal-status">
+      <span id="status-text">Hazır</span>
+      <span class="pmt-qcount">Seçili: <strong id="pmt-q-count">0</strong> soru</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ AYARLAR DRAWER ══════════════ -->
+<div class="settings-overlay hidden" id="settings-overlay"></div>
+<div class="settings-drawer hidden" id="settings-drawer">
+  <div class="drawer-header">
+    <h3>Ayarlar</h3>
+    <button class="btn btn-ghost-dark btn-sm" id="btn-open-history" title="Otomatik Yedekler" style="margin-right:auto">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Yedekler
+    </button>
+    <button class="drawer-close" id="btn-close-settings">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- Çıktı Türü -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Çıktı Türü
+      </div>
+      <div class="output-modes">
+        <label class="output-mode-btn active"><input type="radio" name="output-mode" value="a4" checked/><span class="ombi">▦</span><span>A4 Çift Sütun</span></label>
+        <label class="output-mode-btn"><input type="radio" name="output-mode" value="a4-1col"/><span class="ombi">▬</span><span>A4 Tek Sütun</span></label>
+        <label class="output-mode-btn"><input type="radio" name="output-mode" value="a4-3col"/><span class="ombi">⦀</span><span>A4 3 Sütun</span></label>
+        <label class="output-mode-btn"><input type="radio" name="output-mode" value="a6"/><span class="ombi">▭</span><span>A6 Kart</span></label>
+      </div>
+    </div>
+
+    <!-- Seçenekler -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Seçenekler
+      </div>
+      <div class="drawer-options">
+        <label class="drawer-toggle"><input type="checkbox" id="toggle-score-box"/><span class="toggle-track"></span><span>Puan Kutusu</span></label>
+        <label class="drawer-toggle"><input type="checkbox" id="toggle-answer-key"/><span class="toggle-track"></span><span>Cevap Anahtarı Sayfası</span></label>
+        <label class="drawer-toggle"><input type="checkbox" id="toggle-student-info"/><span class="toggle-track"></span><span>Öğrenci Bilgi Alanı (Ad / Sınıf / Tarih)</span></label>
+      </div>
+    </div>
+
+    <!-- Sınav Bilgileri -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Sınav Bilgileri
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row"><label class="df-label">Ders</label><input type="text" id="exam-lesson" class="df-input" placeholder="Matematik"/></div>
+        <div class="df-row"><label class="df-label">Sınıf</label><input type="text" id="exam-class" class="df-input" placeholder="11-A"/><label class="df-label">Tarih</label><input type="date" id="exam-date" class="df-input" style="max-width:140px"/></div>
+      </div>
+    </div>
+
+    <!-- Watermark / Logo -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Watermark / Logo
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <label class="drawer-toggle"><input type="checkbox" id="toggle-watermark"/><span class="toggle-track"></span><span>Aktif</span></label>
+        </div>
+        <div class="df-row"><label class="df-label">Metin</label><input type="text" id="watermark-text" class="df-input" placeholder="GİZLİ veya okul adı"/></div>
+        <div class="df-row">
+          <label class="df-label">Opaklık</label>
+          <input type="range" id="watermark-opacity" min="5" max="40" value="15" style="flex:1"/>
+          <span class="df-unit" id="watermark-opacity-label">%15</span>
+        </div>
+        <div class="df-row">
+          <label class="btn btn-ghost-dark btn-sm" style="cursor:pointer">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Logo Yükle (PNG)
+            <input type="file" id="watermark-image" accept="image/png,image/jpeg" hidden/>
+          </label>
+          <span id="watermark-image-name" style="font-size:11px;color:var(--text-muted)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Şablonlar -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Şablonlar
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <input type="text" id="template-name-input" class="df-input" placeholder="Şablon adı"/>
+          <button class="btn btn-primary btn-sm" id="btn-save-template">Kaydet</button>
+        </div>
+        <div id="template-list" class="template-list"></div>
+      </div>
+    </div>
+
+    <!-- Soru Bankası -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Soru Bankası
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <button class="btn btn-ghost-dark btn-sm" id="btn-save-to-bank">Seçilenleri Bankaya Ekle</button>
+        </div>
+        <div id="bank-list" class="bank-list"></div>
+      </div>
+    </div>
+
+    <!-- Paylaşım -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Paylaşım
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <button class="btn btn-ghost-dark btn-sm" id="btn-share-link">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Link Oluştur &amp; Kopyala
+          </button>
+        </div>
+        <div id="share-link-box" class="hidden df-row">
+          <input type="text" id="share-link-input" class="df-input" readonly/>
+          <button class="btn btn-primary btn-sm" id="btn-copy-share">Kopyala</button>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Link ile soru listesini (koordinatsız) paylaşırsın. Alıcı kendi PDF'inden soruları tekrar kesebilir.</div>
+      </div>
+    </div>
+
+    <!-- Başlık Bandı -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="5" rx="1"/></svg>
+        Başlık Bandı
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <label class="df-label">Metin</label>
+          <input type="text" id="hdr-text" class="df-input" value="Yazılıya Hazırlık"/>
+        </div>
+        <div class="df-row">
+          <label class="df-label">Zemin</label>
+          <input type="color" id="hdr-bg" value="#ffffff" class="df-color"/>
+          <label class="df-label">Yazı</label>
+          <input type="color" id="hdr-color" value="   #0f1e3c" class="df-color"/>
+          <label class="df-label">Boyut</label>
+          <input type="number" id="hdr-size" value="10" min="5" max="18" step="0.5" class="df-num"/>
+          <span class="df-unit">pt</span>
+          <select id="hdr-font" class="df-select">
+            <option value="helvetica">Helvetica</option>
+            <option value="times">Times</option>
+            <option value="courier">Courier</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boşluklar -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+        Boşluklar (mm)
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <label class="df-label">Soru Arası</label>
+          <div class="df-stepper">
+            <button class="df-step-btn" id="spacing-dec">−</button>
+            <input type="number" id="question-spacing" value="10" min="2" max="30"/>
+            <button class="df-step-btn" id="spacing-inc">+</button>
+          </div>
+        </div>
+        <div class="df-row">
+          <label class="df-label">Sol</label><input type="number" id="mrg-left" value="10" min="3" max="40" class="df-num"/>
+          <label class="df-label">Sağ</label><input type="number" id="mrg-right" value="10" min="3" max="40" class="df-num"/>
+          <label class="df-label">Üst</label><input type="number" id="mrg-top" value="10" min="2" max="40" class="df-num"/>
+          <label class="df-label">Alt</label><input type="number" id="mrg-bottom" value="10" min="2" max="40" class="df-num"/>
+        </div>
+        <div class="df-row">
+          <label class="df-label">Sütun Arası</label><input type="number" id="mrg-col" value="9" min="2" max="30" class="df-num"/>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Sütun Ayırıcı -->
+    <div class="drawer-section" id="col-divider-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="3" x2="12" y2="21"/></svg>
+        Sütun Ayırıcı (A4 2 Sütun)
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <label class="df-label">Çizgi Stili</label>
+          <div class="output-modes" style="flex:1;gap:4px">
+            <label class="output-mode-btn col-div-style-btn active" data-style="solid">
+              <input type="radio" name="col-div-style" value="solid" checked/>
+              <span>Düz</span>
+            </label>
+            <label class="output-mode-btn col-div-style-btn" data-style="dashed">
+              <input type="radio" name="col-div-style" value="dashed"/>
+              <span>Kesik</span>
+            </label>
+            <label class="output-mode-btn col-div-style-btn" data-style="dotted">
+              <input type="radio" name="col-div-style" value="dotted"/>
+              <span>Noktalı</span>
+            </label>
+            <label class="output-mode-btn col-div-style-btn" data-style="none">
+              <input type="radio" name="col-div-style" value="none"/>
+              <span>Yok</span>
+            </label>
+          </div>
+        </div>
+        <div class="df-row">
+          <label class="df-label">Renk</label>
+          <input type="color" id="col-div-color" value="#000000" class="df-color"/>
+          <label class="df-label">Kalınlık</label>
+          <input type="number" id="col-div-width" class="df-num" min="0.1" max="3" step="0.1" value="0.8"/>
+          <span class="df-unit">mm</span>
+        </div>
+        <div class="df-row">
+          <label class="drawer-toggle">
+            <input type="checkbox" id="col-center-text-toggle"/>
+            <span class="toggle-track"></span>
+            <span>Orta şerit metni</span>
+          </label>
+        </div>
+        <div class="df-row" id="col-center-text-row" style="display:none">
+          <label class="df-label">Metin</label>
+          <input type="text" id="col-center-text" class="df-input" placeholder="Yayın adı, okul…" maxlength="40"/>
+        </div>
+        <div class="df-row" id="col-center-text-opts" style="display:none">
+          <label class="df-label">Boyut</label>
+          <input type="number" id="col-center-text-size" class="df-num" min="5" max="14" value="7"/>
+          <span class="df-unit">pt</span>
+          <label class="df-label">Renk</label>
+          <input type="color" id="col-center-text-color" value="#888888" class="df-color"/>
+          <label class="df-label" style="margin-left:6px">Boşluk</label>
+          <input type="number" id="col-center-gap" class="df-num" min="0" max="10" step="0.5" value="2" title="Metin öncesi/sonrası boşluk (karakter sayısı)"/>
+          <span class="df-unit">kar.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- #3: Soru Numarası + Göster Seçenekleri -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Soru Numarası & Gösterim
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <label class="df-label">No Başlangıcı</label>
+          <input type="number" id="q-num-offset" class="df-num" min="0" max="999" value="0"/>
+          <span class="df-unit">+1</span>
+          <span style="font-size:11px;color:var(--text-muted);margin-left:4px">örn: 20 → 21,22…</span>
+        </div>
+        <div class="df-row">
+          <label class="drawer-toggle"><input type="checkbox" id="toggle-difficulty-show"/><span class="toggle-track"></span><span>PDF'te zorluk ikonu</span></label>
+        </div>
+        <div class="df-row">
+          <label class="drawer-toggle"><input type="checkbox" id="toggle-duration-show"/><span class="toggle-track"></span><span>PDF'te tahmini süre</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF Kalite / DPI -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        PDF Çıktı Kalitesi
+      </div>
+      <div class="drawer-fields">
+        <div class="df-row">
+          <label class="df-label">Kalite</label>
+          <div class="output-modes" style="flex:1">
+            <label class="output-mode-btn dpi-btn" id="dpi-btn-low">
+              <input type="radio" name="pdf-dpi" value="low"/>
+              <span>Düşük</span><small>~150 DPI</small>
+            </label>
+            <label class="output-mode-btn dpi-btn active" id="dpi-btn-mid">
+              <input type="radio" name="pdf-dpi" value="mid" checked/>
+              <span>Orta</span><small>~200 DPI</small>
+            </label>
+            <label class="output-mode-btn dpi-btn" id="dpi-btn-high">
+              <input type="radio" name="pdf-dpi" value="high"/>
+              <span>Yüksek</span><small>~300 DPI</small>
+            </label>
+            <label class="output-mode-btn dpi-btn" id="dpi-btn-ultra">
+              <input type="radio" name="pdf-dpi" value="ultra"/>
+              <span>Ultra</span><small>~400 DPI</small>
+            </label>
+          </div>
+        </div>
+        <div class="df-row" style="font-size:11px;color:var(--text-muted);padding-top:2px">
+          Yüksek kalite daha büyük dosya ve daha uzun işlem süresi üretir.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ PREVIEW MODAL ══════════════ -->
+<div class="modal-backdrop hidden" id="preview-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Önizleme</h2>
+      <button class="modal-close" id="close-preview">✕</button>
+    </div>
+    <div class="modal-body preview-with-sort">
+      <div class="preview-sort-sidebar hidden" id="preview-sort-sidebar">
+        <div class="preview-sort-sidebar-title">Soru Sırası <small>⠿ sürükle</small></div>
+        <ul id="preview-sort-list" class="preview-sort-items"></ul>
+      </div>
+      <div class="preview-canvas-area">
+        <canvas id="preview-canvas"></canvas>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-page-nav">
+        <button class="ctrl-btn" id="prev-preview-page">&#8249;</button>
+        <span class="preview-page-nav">
+          <span>Sayfa</span>
+          <input type="number" id="preview-page-input" min="1" value="1"/>
+          <span id="preview-page-total">/ 1</span>
+        </span>
+        <button class="ctrl-btn" id="next-preview-page">&#8250;</button>
+      </div>
+      <div class="modal-info" id="modal-info">—</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost-dark" id="btn-dl-preview-page" title="Bu sayfayı PNG olarak indir">⬇ PNG</button>
+        <button class="btn btn-ghost-dark" id="btn-preview-sort-toggle" title="Soru sıralamasını göster/gizle">⠿ Sırala</button>
+        <button class="btn btn-ghost-dark" id="close-preview-2">Kapat</button>
+        <button class="btn btn-export" id="btn-download-pdf">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PDF İndir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SCAN REVIEW MODAL ══════════════ -->
+<div class="modal-backdrop hidden" id="scan-review-modal">
+  <div class="modal-box scan-review-box">
+    <div class="modal-header">
+      <h2>Algılanan Sorular — İncele &amp; Onayla</h2>
+      <button class="modal-close" id="scan-review-close">✕</button>
+    </div>
+    <div class="modal-body scan-review-body">
+      <div id="scan-review-toolbar" class="scan-review-toolbar"></div>
+      <div id="scan-review-list" class="scan-review-list"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-info">İstemediğin soruları ✕ ile reddet, sonra Onayla'ya bas.</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost-dark" id="scan-review-cancel">İptal</button>
+        <button class="btn btn-primary" id="scan-review-approve">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Seçilenleri Onayla
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAG DROPDOWN ══════════════ -->
+<div class="tag-dropdown hidden" id="tag-dropdown">
+  <div class="tag-dropdown-inner" id="tag-dropdown-list"></div>
+</div>
+<div class="goto-overlay hidden" id="goto-overlay">
+  <div class="goto-box">
+    <div class="goto-title">Sayfaya Git</div>
+    <input type="number" id="goto-input" min="1" placeholder="Sayfa no"/>
+    <div class="goto-hint" id="goto-hint">1 – 1</div>
+    <div class="goto-actions">
+      <button class="btn btn-ghost-dark" id="goto-cancel">İptal</button>
+      <button class="btn btn-primary" id="goto-confirm">Git</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ VERSİYON GEÇMİŞİ ══════════════ -->
+<div class="session-banner hidden" id="history-bar">
+  <span>📚 Otomatik yedek: <strong id="history-info"></strong></span>
+  <select id="history-select" style="font-size:12px;padding:2px 6px;border-radius:5px;border:1px solid var(--border);background:var(--bg-warm);color:var(--text)"></select>
+  <button class="btn btn-primary btn-sm" id="btn-restore-history">Yükle</button>
+  <button class="btn btn-ghost-dark btn-sm" id="btn-close-history">✕</button>
+</div>
+
+<!-- ══════════════ MISC ══════════════ -->
+<div class="loading-overlay hidden" id="loading-overlay">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <span id="loading-text">İşleniyor...</span>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+<div class="thumb-tooltip hidden" id="thumb-tooltip">
+  <canvas id="thumb-canvas" width="180" height="120"></canvas>
+</div>
+<div class="session-banner hidden" id="share-import-banner">
+  <span>🔗 Paylaşılan soru listesi: <strong id="share-import-info"></strong></span>
+  <button class="btn btn-primary btn-sm" id="btn-import-share">Ekle</button>
+  <button class="btn btn-ghost-dark btn-sm" id="btn-dismiss-share">Yoksay</button>
+</div>
+
+<div class="session-banner hidden" id="session-banner">
+  <span>💾 Önceki oturum bulundu.</span>
+  <button class="btn btn-primary btn-sm" id="btn-restore-session">Yükle</button>
+  <button class="btn btn-ghost-dark btn-sm" id="btn-dismiss-session">Yoksay</button>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+/* ═══ ANDROID BRIDGE ══════════════════════════════════════
+   Android WebView'den PDF base64 olarak geldiğinde yükle  */
+window.AndroidPdfLoad = async function(fname, base64Data) {
+  try {
+    const bin = atob(base64Data);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const file = new File([blob], fname, { type: 'application/pdf' });
+    if (typeof loadPDF === 'function') {
+      await loadPDF(file);
+    }
+  } catch(e) {
+    console.error('AndroidPdfLoad hatası:', e);
+  }
+};
+
+/* Android ortamında çalışıp çalışmadığını kontrol et */
+window._isAndroid = !!(window.AndroidBridge && window.AndroidBridge.isAndroid && window.AndroidBridge.isAndroid());
+
+/* Android'de dosya seçici butonu için hook */
+if (window._isAndroid) {
+  document.addEventListener('DOMContentLoaded', function() {
+    // Input[type=file] Android'de sorunlu olabilir — AndroidBridge ile override
+    document.querySelectorAll('input[type="file"][accept*="pdf"]').forEach(function(inp) {
+      inp.addEventListener('click', function(e) {
+        if (window.AndroidBridge && window.AndroidBridge.openFilePicker) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.AndroidBridge.openFilePicker();
+        }
+      });
+    });
+  });
+}
+</script>
+</body>
+</html>
