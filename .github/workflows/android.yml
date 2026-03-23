@@ -19,8 +19,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Gradle izin
-        run: chmod +x gradlew
+      - name: Android SDK kur
+        uses: android-actions/setup-android@v3
+
+      - name: Gradle izin ver
+        run: chmod +x ./gradlew
 
       - name: APK üret
         run: ./gradlew assembleDebug
